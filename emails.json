@@ -1,0 +1,53 @@
+{
+  "metadata": {
+    "total_count": 2,
+    "fetched_at": "2025-10-14T22:18:08.771385",
+    "user_email": "MuznyM@Muzny986.onmicrosoft.com"
+  },
+  "emails": [
+    {
+      "id": "AQMkADkwZjU0YzBjLWVmNDgtNDM4Yy1iNjYAYy04NDdlZjZhZDZiMjUARgAAA2aciSUroHpKlxYdr_OgCjIHAIWP4nhAk6JAj37fR3vQFHEAAAIBDAAAAIWP4nhAk6JAj37fR3vQFHEAAAIFWAAAAA==",
+      "subject": "Welcome to your Azure free account",
+      "from": {
+        "name": "Microsoft Azure",
+        "address": "azure-noreply@microsoft.com"
+      },
+      "to_recipients": [
+        {
+          "name": "Muzny M",
+          "address": "MuznyM@Muzny986.onmicrosoft.com"
+        }
+      ],
+      "cc_recipients": [],
+      "body_preview": "Start using your free services.\r\n\r\nLog in >\r\n        You have 30 days left to use your credit. Check your remaining credit >\r\nWelcome to Azure\r\n\r\nYou’re receiving this email because you recently signed up for an Azure free account. You now have access to ",
+      "received_datetime": "2025-10-14T14:46:55+00:00",
+      "sent_datetime": "2025-10-14T14:46:49+00:00",
+      "is_read": false,
+      "has_attachments": false,
+      "importance": "normal",
+      "conversation_id": "AAQkADkwZjU0YzBjLWVmNDgtNDM4Yy1iNjZjLTg0N2VmNmFkNmIyNQAQAAVjG_xDVIFEgU7FyqBOLnA="
+    },
+    {
+      "id": "AQMkADkwZjU0YzBjLWVmNDgtNDM4Yy1iNjYAYy04NDdlZjZhZDZiMjUARgAAA2aciSUroHpKlxYdr_OgCjIHAIWP4nhAk6JAj37fR3vQFHEAAAIBDAAAAIWP4nhAk6JAj37fR3vQFHEAAAIFUQAAAA==",
+      "subject": "Your Microsoft invoice G119083918 is ready",
+      "from": {
+        "name": "Microsoft",
+        "address": "microsoft-noreply@microsoft.com"
+      },
+      "to_recipients": [
+        {
+          "name": "Muzny M",
+          "address": "MuznyM@Muzny986.onmicrosoft.com"
+        }
+      ],
+      "cc_recipients": [],
+      "body_preview": "Sign in to review your latest invoice.\r\n\r\nReview your Microsoft invoice\r\n\r\nYour statement is ready for review. Sign in to view it. If you’ve already paid, disregard this email.\r\n\r\nIf paying by credit card, we'll automatically charge the card we have on fi",
+      "received_datetime": "2025-10-14T14:21:58+00:00",
+      "sent_datetime": "2025-10-14T14:21:49+00:00",
+      "is_read": true,
+      "has_attachments": false,
+      "importance": "normal",
+      "conversation_id": "AAQkADkwZjU0YzBjLWVmNDgtNDM4Yy1iNjZjLTg0N2VmNmFkNmIyNQAQAPJsGjbTxMxNm_F-1iN2bWo="
+    }
+  ]
+}
