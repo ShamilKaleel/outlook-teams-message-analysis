@@ -5,6 +5,7 @@ import uvicorn
 
 from app.routers.outlook_router import router as outlook_router
 from app.routers.teams_router import router as teams_router
+from app.routers.analytics_router import router as analytics_router
 
 # Initialize FastAPI app
 app = FastAPI(
@@ -25,6 +26,7 @@ app.add_middleware(
 # Include routers
 app.include_router(outlook_router)
 app.include_router(teams_router)
+app.include_router(analytics_router)
 
 
 @app.get("/")
@@ -37,6 +39,8 @@ async def root():
             "health": "/health",
             "outlook_emails": "/outlook/emails",
             "teams_chats": "/teams/chats",
+            "outlook_analytics": "/analytics/outlook/analyze",
+            "teams_analytics": "/analytics/teams/analyze",
         }
     }
 

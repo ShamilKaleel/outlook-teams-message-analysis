@@ -5,7 +5,7 @@ These models define the structure of Teams chat and message data
 returned by the Microsoft Graph API endpoints.
 """
 
-from typing import Optional
+from typing import Optional, List
 from pydantic import BaseModel, Field
 
 
@@ -111,3 +111,59 @@ class TeamsChatsResponse(BaseModel):
     metadata: TeamsMetadata = Field(..., description="Fetch operation metadata")
     chats: list[TeamChat] = Field(..., description="List of all chats")
     messages: list[TeamMessage] = Field(..., description="List of all messages")
+
+
+class TeamsMetrics(BaseModel):
+    """
+    Simple metrics for Teams communication analysis.
+
+    Covers volume, response, engagement, and quality metrics.
+    """
+    # Volume metrics
+    messages_received: int = Field(..., description="Total messages received")
+    messages_sent: int = Field(..., description="Total messages sent")
+    messages_replied: int = Field(..., description="Total messages replied to")
+
+    # Response metrics
+    average_response_time_hours: Optional[float] = Field(None, description="Average response time in hours")
+    reply_rate_percentage: float = Field(..., description="Percentage of messages that received replies")
+
+    # Engagement metrics
+    proactive_messages: int = Field(..., description="Messages initiated (not replies)")
+    reactive_messages: int = Field(..., description="Messages that are replies")
+    peak_activity_hours: List[int] = Field(default_factory=list, description="Top 3 hours of activity (0-23)")
+
+    # Quality indicators
+    average_message_length: float = Field(..., description="Average character length of messages")
+
+
+class TeamsProductivityScore(BaseModel):
+    """
+    Simple productivity scoring for Teams communication.
+    """
+    overall_score: int = Field(..., ge=0, le=100, description="Overall productivity score (0-100)")
+    responsiveness_score: int = Field(..., ge=0, le=100, description="Responsiveness score (0-100)")
+    engagement_score: int = Field(..., ge=0, le=100, description="Engagement score (0-100)")
+    quality_score: int = Field(..., ge=0, le=100, description="Quality score (0-100)")
+
+
+class TeamsInsight(BaseModel):
+    """
+    Simple insight or recommendation for Teams communication.
+    """
+    title: str = Field(..., description="Insight title")
+    description: str = Field(..., description="Detailed description")
+    suggestion: str = Field(..., description="Actionable suggestion")
+    priority: str = Field(..., description="Priority level: high, medium, or low")
+
+
+class TeamsAnalysisResult(BaseModel):
+    """
+    Main output for Teams communication analysis.
+
+    Contains metrics, scoring, insights, and summary.
+    """
+    metrics: TeamsMetrics = Field(..., description="Communication metrics")
+    productivity_score: TeamsProductivityScore = Field(..., description="Productivity scores")
+    insights: List[TeamsInsight] = Field(..., description="Insights and recommendations")
+    summary: str = Field(..., description="AI-generated executive summary")
