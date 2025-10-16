@@ -96,11 +96,6 @@ class LLMConfig:
         if self.api_key:
             config["api_key"] = self.api_key
 
-        # Add Azure-specific params if using Azure
-        if self.provider == "azure":
-            config["api_base"] = self.api_base
-            config["api_version"] = self.api_version
-
         return config
 
     def create_dspy_lm(self):
