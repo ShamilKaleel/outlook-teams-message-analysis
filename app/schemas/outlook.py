@@ -5,7 +5,7 @@ These models define the structure of Outlook email data
 returned by the Microsoft Graph API endpoints.
 """
 
-from typing import Optional
+from typing import Optional, List
 from pydantic import BaseModel, Field
 
 
@@ -117,3 +117,88 @@ class OutlookEmailsResponse(BaseModel):
     """
     metadata: OutlookMetadata = Field(..., description="Fetch operation metadata")
     emails: list[OutlookEmail] = Field(..., description="List of all emails")
+
+
+class OutlookReplyProductivity(BaseModel):
+    """
+    Reply productivity metrics for Outlook email conversations.
+
+    Tracks conversation-level reply rates and engagement.
+
+    Attributes:
+        conversations_received: Total number of unique conversations received
+        conversations_replied: Number of conversations that received at least one reply
+        reply_rate_conversation_level: Percentage of conversations that were replied to
+    """
+    conversations_received: int = Field(
+        ..., description="Total number of unique conversations received"
+    )
+    conversations_replied: int = Field(
+        ..., description="Number of conversations that received at least one reply"
+    )
+    reply_rate_conversation_level: float = Field(
+        ...,
+        description="Percentage of conversations that were replied to (conversations_replied / conversations_received * 100)",
+    )
+
+
+class OutlookConversationSuggestion(BaseModel):
+    """
+    AI-generated suggestions for improving email management for a specific conversation.
+
+    Provides actionable recommendations for email handling and communication.
+
+    Attributes:
+        conversationId: Unique identifier of the conversation thread
+        counterparty: Email address of the counterparty in this conversation
+        suggestions: List of actionable suggestions for this conversation
+    """
+    conversationId: str = Field(
+        ..., description="Unique identifier of the conversation thread"
+    )
+    counterparty: str = Field(
+        ..., description="Email address of the counterparty in this conversation"
+    )
+    suggestions: List[str] = Field(
+        ...,
+        description="List of actionable suggestions for improving email management and communication for this conversation",
+    )
+
+
+class OutlookAnalysisResult(BaseModel):
+    """
+    Comprehensive analytics result for Outlook email analysis.
+
+    Contains email statistics, productivity metrics, and AI-generated suggestions.
+
+    Attributes:
+        total_emails: Total number of emails analyzed
+        inbox: Number of emails in inbox folder
+        sent_items: Number of emails in sent items folder
+        spam_emails: Number of emails identified as spam or junk
+        urgent_emails_with_rsvp: Number of urgent emails requiring RSVP or immediate action
+        reply_productivity: Reply productivity metrics at conversation level
+        average_response_time: Average response time in hours for replied emails
+        suggestions_for_replied_email: List of suggestions for each replied conversation
+    """
+    total_emails: int = Field(..., description="Total number of emails analyzed")
+    inbox: int = Field(..., description="Number of emails in inbox folder")
+    sent_items: int = Field(..., description="Number of emails in sent items folder")
+    spam_emails: int = Field(
+        ..., description="Number of emails identified as spam or junk"
+    )
+    urgent_emails_with_rsvp: int = Field(
+        ...,
+        description="Number of urgent emails that require RSVP or immediate action",
+    )
+    reply_productivity: OutlookReplyProductivity = Field(
+        ..., description="Reply productivity metrics at conversation level"
+    )
+    average_response_time: Optional[float] = Field(
+        None,
+        description="Average response time in hours calculated from receivedDateTime to sentDateTime for replied emails",
+    )
+    suggestions_for_replied_email: List[OutlookConversationSuggestion] = Field(
+        ...,
+        description="List of actionable suggestions for each conversation that has been replied to",
+    )
