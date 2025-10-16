@@ -1,24 +1,19 @@
 from fastapi import APIRouter, HTTPException
 from app.services.outlook_service import fetch_all_emails_raw
+from app.schemas.outlook import OutlookEmailsResponse
 
 router = APIRouter(prefix="/outlook", tags=["Outlook"])
 
 
-@router.get("/emails")
-async def get_all_emails():
+@router.get("/emails", response_model=OutlookEmailsResponse)
+async def get_all_emails() -> OutlookEmailsResponse:
     """
-    Fetch all Outlook emails and return raw Graph API response data.
+    Fetch all Outlook emails with structured analytics data.
 
     Returns:
-        dict: Raw email data with metadata
-            {
-                "metadata": {
-                    "total_count": int,
-                    "fetched_at": str,
-                    "user_email": str
-                },
-                "emails": [raw message objects from Graph API]
-            }
+        OutlookEmailsResponse: Structured response containing:
+            - metadata: Fetch operation details (total_count, fetched_at, user_email)
+            - emails: List of email objects with analytics-relevant fields (24 fields total)
 
     Raises:
         HTTPException: 500 if authentication or API call fails
