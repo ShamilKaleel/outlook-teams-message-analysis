@@ -1,0 +1,17 @@
+# Cache files
+cache/
+*.json
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Streamlit
+.streamlit/
+
+# Virtual environment
+venv/
+.venv/
