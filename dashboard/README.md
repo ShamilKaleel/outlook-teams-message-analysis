@@ -12,35 +12,6 @@ Professional Streamlit dashboard with 10 interactive Plotly visualizations for O
 - 🎯 **Auto-fetch**: Automatically fetches analytics on first visit if no cache exists
 - 🎨 **Beautiful UI**: Professional interface with custom CSS styling, color-coded metrics, and responsive grid layouts
 
-## Setup
-
-### 1. Install Dependencies (using uv)
-
-```bash
-cd dashboard
-uv pip install -r requirements.txt
-```
-
-### 2. Ensure FastAPI Server is Running
-
-The dashboard connects to the FastAPI backend. Make sure the server is running:
-
-```bash
-# From the project root
-uv run uvicorn main:app --host 0.0.0.0 --port 8000
-```
-
-The server should be running at `http://localhost:8000`
-
-### 3. Run the Dashboard
-
-```bash
-cd dashboard
-uv run streamlit run streamlit_app.py
-```
-
-The dashboard will open in your browser at `http://localhost:8501`
-
 ## Usage
 
 ### First Time Use
@@ -140,12 +111,6 @@ To change:
 - Wait for the request to complete
 - Timeout is set to 5 minutes (300 seconds)
 
-### Missing Dependencies
-
-```bash
-cd dashboard
-uv pip install -r requirements.txt
-```
 
 ### Cache Issues
 
