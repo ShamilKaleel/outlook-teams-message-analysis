@@ -27,7 +27,7 @@ A FastAPI-based REST API for capturing Outlook emails and Teams chat messages us
 1. Clone the repository:
 ```bash
 git clone <repository-url>
-cd Microsoft-Graph-SDK
+cd outlook
 ```
 
 2. Install dependencies using `uv`:
@@ -54,7 +54,6 @@ uv run uvicorn main:app --host 0.0.0.0 --port 8000
 The API will be available at:
 - **Base URL**: http://localhost:8000
 - **API Documentation**: http://localhost:8000/docs
-- **Alternative Docs**: http://localhost:8000/redoc
 
 ### API Endpoints
 

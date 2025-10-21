@@ -28,27 +28,29 @@ class OutlookEmailAnalysis(dspy.Signature):
 
     This DSPy signature analyzes a user's complete Outlook email dataset to provide actionable
     insights for improving email management, communication efficiency, and productivity. The
-    analysis includes email distribution across folders, conversation-level reply patterns,
-    average response times, and personalized suggestions for better email practices.
+    analysis provides multi-dimensional metrics, productivity scoring, quality assessment, and
+    prioritized recommendations.
 
     Key Analysis Features:
-    - Email categorization by folder (inbox, sent items, spam, urgent with RSVP)
-    - Conversation-level reply productivity metrics (received vs. replied conversations)
-    - Average response time calculation from received to sent timestamps
-    - Actionable suggestions for each replied conversation to improve communication
-    - Identification of urgent emails requiring immediate attention
+    - Volume Metrics: Emails received, sent, replied, inbox count, spam, urgent, unread backlog
+    - Response Metrics: Average/median response times, reply rates, conversation tracking
+    - Engagement Metrics: Proactive vs reactive communication, time-of-day trends, activity patterns
+    - Quality Indicators: Email length, clarity score, tone assessment, sentiment, conciseness
+    - Productivity Scoring: Overall, responsiveness, engagement, and quality scores (0-100)
+    - Insights & Recommendations: Prioritized suggestions (high/medium/low) with categories
+      (delay/bottleneck/optimal_timing/follow_up/style/workload)
 
     Input Requirements:
     - all_email: Complete list of Outlook email messages with analytics-relevant fields (24 fields)
     - metadata: Metadata about the fetch operation (total_count, fetched_at, user_email)
 
     Output:
-    - OutlookAnalysisResult: Structured analysis with counts, metrics, response times, and suggestions
+    - OutlookAnalysisResult: Comprehensive structured analysis organized by metric categories
     """
 
     # Input Fields with Comprehensive Descriptions
     all_email: List[OutlookEmail] = dspy.InputField(
-        desc="Complete set of email messages retrieved from the user's Outlook account for analysis. Each email includes 24 analytics-relevant fields such as message_id, conversation_id, timestamps (created_at, sent_at, received_at), sender information, recipients (to, cc, bcc, reply_to), subject, body_preview, importance, read status, attachments indicator, flag status, and derived fields (is_reply, recipient_count). This rich dataset enables thorough examination of communication patterns, content quality, and contextual relevance for generating actionable insights and recommendations."
+        desc="Complete set of email messages retrieved from the user's Outlook account for analysis. Each email includes 24 analytics-relevant fields such as message_id, conversation_id, timestamps (created_at, sent_at, received_at), sender information, recipients (to, cc, bcc, reply_to), subject, body_preview, importance, read status, attachments indicator, flag status, and derived fields (is_reply, recipient_count). This rich dataset enables thorough examination of communication patterns, engagement levels, response behaviors, content quality, and contextual relevance for generating comprehensive analytics and actionable insights."
     )
 
     metadata: OutlookMetadata = dspy.InputField(
@@ -57,7 +59,7 @@ class OutlookEmailAnalysis(dspy.Signature):
 
     # Output Field
     analysis_result: OutlookAnalysisResult = dspy.OutputField(
-        desc="Comprehensive email analysis results including email counts by folder (total, inbox, sent items, spam, urgent with RSVP), reply productivity metrics (conversations received, conversations replied, reply rate at conversation level), average response time in hours calculated from received to sent timestamps for replied emails, and actionable suggestions for each replied conversation to improve email management and communication efficiency."
+        desc="Comprehensive email analysis results organized into structured categories: (1) volume_metrics - emails received/sent/replied, inbox/spam/urgent counts, unread backlog; (2) response_metrics - average/median response time, reply rate %, conversations received/replied; (3) engagement_metrics - proactive vs reactive emails, ratio, peak activity hours (top 3), time-of-day distribution, most active day; (4) quality_indicators - average/median email length, clarity score (0-100), tone (professional/casual/mixed), sentiment distribution, conciseness score (0-100); (5) productivity_score - overall/responsiveness/engagement/quality scores (0-100), trend (improving/stable/declining), benchmark comparison; (6) insights - prioritized list of recommendations with title, description, suggestion, priority (high/medium/low), category (delay/bottleneck/optimal_timing/follow_up/style/workload); (7) summary - AI-generated executive summary highlighting key patterns and areas for improvement."
     )
 
 

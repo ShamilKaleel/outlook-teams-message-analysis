@@ -9,6 +9,7 @@ import streamlit as st
 from datetime import datetime
 from cache_manager import CacheManager
 from api_client import AnalyticsAPIClient
+import visualizations as viz
 
 
 # Page configuration
@@ -18,6 +19,85 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded"
 )
+
+# Custom CSS for better styling - Theme aware
+st.markdown("""
+    <style>
+    /* Main container padding */
+    .main .block-container {
+        padding-top: 2rem;
+        padding-bottom: 2rem;
+    }
+
+    /* Subheader styling - Theme aware */
+    h2, h3 {
+        padding-top: 1rem;
+        opacity: 0.9;
+    }
+
+    /* Metric styling - Theme aware */
+    [data-testid="stMetric"] {
+        background-color: rgba(128, 128, 128, 0.1);
+        border: 1px solid rgba(128, 128, 128, 0.2);
+        padding: 1rem;
+        border-radius: 0.5rem;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Enhanced metric styling for dark theme */
+    @media (prefers-color-scheme: dark) {
+        [data-testid="stMetric"] {
+            background-color: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 2px 4px rgba(255, 255, 255, 0.05);
+        }
+    }
+
+    /* Button styling */
+    .stButton button {
+        border-radius: 0.5rem;
+        font-weight: 600;
+    }
+
+    /* Expander styling - Theme aware */
+    .streamlit-expanderHeader {
+        background-color: rgba(128, 128, 128, 0.05);
+        border: 1px solid rgba(128, 128, 128, 0.1);
+        border-radius: 0.5rem;
+        font-weight: 500;
+    }
+
+    /* Enhanced expander for dark theme */
+    @media (prefers-color-scheme: dark) {
+        .streamlit-expanderHeader {
+            background-color: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+    }
+
+    /* Divider styling - Theme aware */
+    hr {
+        margin: 2rem 0;
+        opacity: 0.2;
+    }
+
+    /* Tab styling */
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 2rem;
+    }
+
+    .stTabs [data-baseweb="tab"] {
+        padding: 1rem 2rem;
+        font-size: 1.1rem;
+        font-weight: 600;
+    }
+
+    /* Info/Success/Warning box styling */
+    .stAlert {
+        border-radius: 0.5rem;
+    }
+    </style>
+""", unsafe_allow_html=True)
 
 # Initialize managers
 cache_manager = CacheManager()
@@ -74,7 +154,7 @@ def fetch_teams_analytics(force_refresh=False):
 
 
 def display_outlook_analytics(analytics_data, from_cache):
-    """Display Outlook analytics in a nice format."""
+    """Display Outlook analytics with comprehensive visualizations."""
     if not analytics_data:
         st.warning("⚠️ No Outlook analytics data available.")
         if st.button("🔄 Fetch Analytics Now", key="outlook_first_fetch"):
@@ -86,118 +166,91 @@ def display_outlook_analytics(analytics_data, from_cache):
     data = analytics_data["data"]
     cached_at = analytics_data["cached_at"]
 
-    # Cache info
-    if from_cache:
-        st.info(f"📦 Showing cached data from: {cached_at}")
-    else:
-        st.success(f"✅ Fresh data fetched at: {cached_at}")
+    volume = data.get("volume_metrics", {})
+    response = data.get("response_metrics", {})
+    engagement = data.get("engagement_metrics", {})
+    quality = data.get("quality_indicators", {})
+    scores = data.get("productivity_score", {})
+    insights = data.get("insights", [])
 
-    # Refresh button
-    if st.button("🔄 Fetch Recent Analytics", key="outlook_refresh"):
-        result, _ = fetch_outlook_analytics(force_refresh=True)
-        if result:
-            st.rerun()
-
-    st.divider()
-
-    # Email Statistics
-    st.subheader("📧 Email Statistics")
-    col1, col2, col3, col4 = st.columns(4)
-    col1.metric("Total Emails", data.get("total_emails", 0))
-    col2.metric("Inbox", data.get("inbox", 0))
-    col3.metric("Sent Items", data.get("sent_items", 0))
-    col4.metric("Spam", data.get("spam_emails", 0))
-
-    col5, col6 = st.columns(2)
-    col5.metric("Urgent (RSVP)", data.get("urgent_emails_with_rsvp", 0))
-    col6.metric("Avg Response Time",
-                f"{data.get('average_response_time', 0):.1f} hours" if data.get('average_response_time') else "N/A")
-
-    st.divider()
-
-    # Reply Productivity
-    st.subheader("💬 Reply Productivity")
-    reply_prod = data.get("reply_productivity", {})
-
-    col1, col2, col3 = st.columns(3)
-    col1.metric("Conversations Received", reply_prod.get("conversations_received", 0))
-    col2.metric("Conversations Replied", reply_prod.get("conversations_replied", 0))
-    col3.metric("Reply Rate", f"{reply_prod.get('reply_rate_conversation_level', 0):.1f}%")
-
-    st.divider()
-
-    # Suggestions
-    st.subheader("💡 AI Suggestions for Improvement")
-    suggestions = data.get("suggestions_for_replied_email", [])
-
-    if suggestions:
-        for i, suggestion in enumerate(suggestions[:5]):  # Show top 5
-            with st.expander(f"💬 Conversation with {suggestion.get('counterparty', 'Unknown')}"):
-                st.write(f"**Conversation ID:** `{suggestion.get('conversationId', 'N/A')}`")
-                st.write("**Suggestions:**")
-                for sug in suggestion.get('suggestions', []):
-                    st.write(f"- {sug}")
-    else:
-        st.info("No suggestions available.")
-
-
-def display_teams_analytics(analytics_data, from_cache):
-    """Display Teams analytics in a nice format."""
-    if not analytics_data:
-        st.warning("⚠️ No Teams analytics data available.")
-        if st.button("🔄 Fetch Analytics Now", key="teams_first_fetch"):
-            result, _ = fetch_teams_analytics(force_refresh=True)
+    # Cache info and refresh button
+    col1, col2 = st.columns([3, 1])
+    with col1:
+        if from_cache:
+            st.info(f"📦 Showing cached data from: {cached_at}")
+        else:
+            st.success(f"✅ Fresh data fetched at: {cached_at}")
+    with col2:
+        if st.button("🔄 Fetch Recent Analytics", key="outlook_refresh", use_container_width=True):
+            result, _ = fetch_outlook_analytics(force_refresh=True)
             if result:
                 st.rerun()
-        return
-
-    data = analytics_data["data"]
-    cached_at = analytics_data["cached_at"]
-
-    # Cache info
-    if from_cache:
-        st.info(f"📦 Showing cached data from: {cached_at}")
-    else:
-        st.success(f"✅ Fresh data fetched at: {cached_at}")
-
-    # Refresh button
-    if st.button("🔄 Fetch Recent Analytics", key="teams_refresh"):
-        result, _ = fetch_teams_analytics(force_refresh=True)
-        if result:
-            st.rerun()
 
     st.divider()
 
-    # Metrics
-    st.subheader("📊 Communication Metrics")
-    metrics = data.get("metrics", {})
+    # KPI Cards at Top
+    st.subheader("📊 Key Volume Metrics")
+    col1, col2, col3, col4, col5 = st.columns(5)
+    col1.metric("Received", volume.get("emails_received", 0))
+    col2.metric("Sent", volume.get("emails_sent", 0))
+    col3.metric("Inbox", volume.get("inbox_count", 0))
+    col4.metric("Unread", volume.get("unread_count", 0))
+    col5.metric("Urgent", volume.get("urgent_count", 0))
 
-    col1, col2, col3 = st.columns(3)
-    col1.metric("Messages Received", metrics.get("messages_received", 0))
-    col2.metric("Messages Sent", metrics.get("messages_sent", 0))
-    col3.metric("Messages Replied", metrics.get("messages_replied", 0))
+    st.divider()
 
-    col4, col5, col6 = st.columns(3)
-    col4.metric("Proactive Messages", metrics.get("proactive_messages", 0))
-    col5.metric("Reactive Messages", metrics.get("reactive_messages", 0))
-    col6.metric("Reply Rate", f"{metrics.get('reply_rate_percentage', 0):.1f}%")
+    # Email Distribution and Reply Productivity
+    st.subheader("📧 Email Distribution & Reply Productivity")
+    col1, col2 = st.columns(2)
 
-    col7, col8 = st.columns(2)
-    col7.metric("Avg Response Time",
-                f"{metrics.get('average_response_time_hours', 0):.1f} hours" if metrics.get('average_response_time_hours') else "N/A")
-    col8.metric("Avg Message Length", f"{metrics.get('average_message_length', 0):.0f} chars")
+    with col1:
+        # Email distribution donut chart
+        fig_distribution = viz.create_email_distribution_donut(data)
+        st.plotly_chart(fig_distribution, use_container_width=True)
 
-    # Peak Activity Hours
-    peak_hours = metrics.get("peak_activity_hours", [])
-    if peak_hours:
-        st.write(f"**⏰ Peak Activity Hours:** {', '.join(f'{h}:00' for h in peak_hours)}")
+    with col2:
+        # Reply productivity funnel
+        fig_funnel = viz.create_reply_funnel(data)
+        st.plotly_chart(fig_funnel, use_container_width=True)
+
+    st.divider()
+
+    # Response Performance
+    st.subheader("⚡ Response Performance")
+    col1, col2 = st.columns(2)
+
+    with col1:
+        # Reply rate gauge
+        fig_gauge = viz.create_reply_rate_gauge(data)
+        st.plotly_chart(fig_gauge, use_container_width=True)
+
+    with col2:
+        # Response time metrics
+        avg_response = response.get('average_response_time_hours')
+        median_response = response.get('median_response_time_hours')
+
+        if avg_response:
+            st.metric(
+                "Average Response Time",
+                f"{avg_response:.1f} hours",
+                help="Average time to respond to emails"
+            )
+            if avg_response < 4:
+                st.success("🟢 Excellent response time!")
+            elif avg_response < 24:
+                st.info("🟡 Good response time")
+            else:
+                st.warning("🔴 Consider improving response time")
+        else:
+            st.metric("Average Response Time", "N/A")
+
+        if median_response:
+            st.metric("Median Response Time", f"{median_response:.1f} hours")
 
     st.divider()
 
     # Productivity Scores
     st.subheader("🎯 Productivity Scores")
-    scores = data.get("productivity_score", {})
-
     col1, col2, col3, col4 = st.columns(4)
 
     with col1:
@@ -216,29 +269,235 @@ def display_teams_analytics(analytics_data, from_cache):
         st.metric("Quality", f"{scores.get('quality_score', 0)}/100")
         st.progress(scores.get('quality_score', 0) / 100)
 
+    # Trend and benchmark
+    if scores.get('trend'):
+        st.write(f"**📈 Trend:** {scores.get('trend').title()}")
+    if scores.get('benchmark_comparison'):
+        st.write(f"**📊 Benchmark:** {scores.get('benchmark_comparison').title()}")
+
     st.divider()
 
-    # Insights
+    # Engagement Metrics
+    st.subheader("💬 Engagement Patterns")
+    col1, col2 = st.columns(2)
+
+    with col1:
+        st.metric("Proactive Emails", engagement.get("proactive_emails", 0))
+        st.metric("Reactive Emails", engagement.get("reactive_emails", 0))
+        ratio = engagement.get("proactive_vs_reactive_ratio", 0)
+        st.metric("Proactive/Reactive Ratio", f"{ratio:.2f}")
+
+    with col2:
+        peak_hours = engagement.get("peak_activity_hours", [])
+        if peak_hours:
+            st.write(f"**⏰ Peak Activity Hours:** {', '.join(f'{h}:00' for h in peak_hours)}")
+
+        most_active_day = engagement.get("most_active_day_of_week")
+        if most_active_day:
+            st.write(f"**📅 Most Active Day:** {most_active_day}")
+
+    st.divider()
+
+    # Quality Indicators
+    st.subheader("✨ Quality Assessment")
+    col1, col2, col3 = st.columns(3)
+
+    with col1:
+        st.metric("Avg Email Length", f"{quality.get('average_email_length', 0):.0f} chars")
+        st.metric("Clarity Score", f"{quality.get('clarity_score', 0)}/100")
+
+    with col2:
+        st.metric("Tone", quality.get('tone_assessment', 'N/A').title())
+        st.metric("Conciseness Score", f"{quality.get('conciseness_score', 0)}/100")
+
+    with col3:
+        sentiment = quality.get('sentiment_distribution', {})
+        if sentiment:
+            st.write("**Sentiment Distribution:**")
+            for sent_type, count in sentiment.items():
+                st.write(f"- {sent_type.title()}: {count}")
+
+    st.divider()
+
+    # Insights & Recommendations
     st.subheader("💡 Insights & Recommendations")
-    insights = data.get("insights", [])
 
     if insights:
-        for insight in insights:
-            priority = insight.get("priority", "medium")
-            emoji = "🔴" if priority == "high" else "🟡" if priority == "medium" else "🟢"
+        # Bar chart by category
+        fig_insights = viz.create_outlook_insights_by_category_bar(insights)
+        st.plotly_chart(fig_insights, use_container_width=True)
 
-            with st.expander(f"{emoji} {insight.get('title', 'Insight')} ({priority.upper()})"):
-                st.write(f"**Description:** {insight.get('description', 'N/A')}")
-                st.write(f"**💡 Suggestion:** {insight.get('suggestion', 'N/A')}")
+        # Detailed insights grouped by priority
+        st.write("**Detailed Recommendations:**")
+
+        # Group by priority
+        high_priority = [i for i in insights if i.get("priority", "").lower() == "high"]
+        medium_priority = [i for i in insights if i.get("priority", "").lower() == "medium"]
+        low_priority = [i for i in insights if i.get("priority", "").lower() == "low"]
+
+        # Display by priority
+        if high_priority:
+            st.write("🔴 **High Priority:**")
+            for insight in high_priority[:3]:  # Show top 3
+                with st.expander(f"{insight.get('title', 'Insight')} [{insight.get('category', 'general')}]"):
+                    st.write(f"**Description:** {insight.get('description', 'N/A')}")
+                    st.write(f"**💡 Suggestion:** {insight.get('suggestion', 'N/A')}")
+
+        if medium_priority:
+            st.write("🟡 **Medium Priority:**")
+            for insight in medium_priority[:2]:  # Show top 2
+                with st.expander(f"{insight.get('title', 'Insight')} [{insight.get('category', 'general')}]"):
+                    st.write(f"**Description:** {insight.get('description', 'N/A')}")
+                    st.write(f"**💡 Suggestion:** {insight.get('suggestion', 'N/A')}")
+
+        if low_priority:
+            st.write("🟢 **Low Priority:**")
+            for insight in low_priority[:2]:  # Show top 2
+                with st.expander(f"{insight.get('title', 'Insight')} [{insight.get('category', 'general')}]"):
+                    st.write(f"**Description:** {insight.get('description', 'N/A')}")
+                    st.write(f"**💡 Suggestion:** {insight.get('suggestion', 'N/A')}")
     else:
         st.info("No insights available.")
 
     st.divider()
 
-    # Summary
+    # Executive Summary
     st.subheader("📝 Executive Summary")
     summary = data.get("summary", "No summary available.")
-    st.write(summary)
+    st.markdown(f"_{summary}_")
+
+
+def display_teams_analytics(analytics_data, from_cache):
+    """Display Teams analytics with enhanced visualizations."""
+    if not analytics_data:
+        st.warning("⚠️ No Teams analytics data available.")
+        if st.button("🔄 Fetch Analytics Now", key="teams_first_fetch"):
+            result, _ = fetch_teams_analytics(force_refresh=True)
+            if result:
+                st.rerun()
+        return
+
+    data = analytics_data["data"]
+    cached_at = analytics_data["cached_at"]
+    metrics = data.get("metrics", {})
+    scores = data.get("productivity_score", {})
+    insights = data.get("insights", [])
+
+    # Cache info and refresh button
+    col1, col2 = st.columns([3, 1])
+    with col1:
+        if from_cache:
+            st.info(f"📦 Showing cached data from: {cached_at}")
+        else:
+            st.success(f"✅ Fresh data fetched at: {cached_at}")
+    with col2:
+        if st.button("🔄 Fetch Recent Analytics", key="teams_refresh", use_container_width=True):
+            result, _ = fetch_teams_analytics(force_refresh=True)
+            if result:
+                st.rerun()
+
+    st.divider()
+
+    # KPI Cards at Top
+    st.subheader("📊 Key Communication Metrics")
+    col1, col2, col3, col4 = st.columns(4)
+    col1.metric("Messages Received", metrics.get("messages_received", 0))
+    col2.metric("Messages Sent", metrics.get("messages_sent", 0))
+    col3.metric("Messages Replied", metrics.get("messages_replied", 0))
+    col4.metric("Avg Message Length", f"{metrics.get('average_message_length', 0):.0f} chars")
+
+    st.divider()
+
+    # Message Volume and Communication Style
+    st.subheader("📈 Message Volume & Communication Style")
+    col1, col2 = st.columns(2)
+
+    with col1:
+        # Message volume bar chart
+        fig_volume = viz.create_message_volume_bar(metrics)
+        st.plotly_chart(fig_volume, use_container_width=True)
+
+    with col2:
+        # Proactive vs Reactive donut chart
+        fig_proactive = viz.create_proactive_reactive_donut(metrics)
+        st.plotly_chart(fig_proactive, use_container_width=True)
+
+    st.divider()
+
+    # Productivity Scores and Response Metrics
+    st.subheader("🎯 Productivity Scores & Response Metrics")
+    col1, col2 = st.columns([3, 2])
+
+    with col1:
+        # Productivity radar chart
+        fig_radar = viz.create_productivity_radar(scores)
+        st.plotly_chart(fig_radar, use_container_width=True)
+
+    with col2:
+        # Response time and reply rate gauges
+        fig_response, fig_reply = viz.create_response_gauges(metrics)
+        st.plotly_chart(fig_response, use_container_width=True)
+        st.plotly_chart(fig_reply, use_container_width=True)
+
+    st.divider()
+
+    # Peak Activity Hours
+    st.subheader("⏰ Peak Activity Hours")
+    fig_peak = viz.create_peak_hours_bar(metrics)
+    st.plotly_chart(fig_peak, use_container_width=True)
+
+    st.divider()
+
+    # Insights Priority Breakdown
+    st.subheader("💡 Insights & Recommendations")
+
+    if insights:
+        col1, col2 = st.columns([1, 2])
+
+        with col1:
+            # Priority pie chart
+            fig_priority = viz.create_insights_priority_pie(insights)
+            st.plotly_chart(fig_priority, use_container_width=True)
+
+        with col2:
+            # Detailed insights grouped by priority
+            st.write("**Detailed Recommendations:**")
+
+            # Group by priority
+            high_priority = [i for i in insights if i.get("priority", "").lower() == "high"]
+            medium_priority = [i for i in insights if i.get("priority", "").lower() == "medium"]
+            low_priority = [i for i in insights if i.get("priority", "").lower() == "low"]
+
+            # Display by priority
+            if high_priority:
+                st.write("🔴 **High Priority:**")
+                for insight in high_priority[:3]:  # Show top 3
+                    with st.expander(f"{insight.get('title', 'Insight')}"):
+                        st.write(f"**Description:** {insight.get('description', 'N/A')}")
+                        st.write(f"**💡 Suggestion:** {insight.get('suggestion', 'N/A')}")
+
+            if medium_priority:
+                st.write("🟡 **Medium Priority:**")
+                for insight in medium_priority[:2]:  # Show top 2
+                    with st.expander(f"{insight.get('title', 'Insight')}"):
+                        st.write(f"**Description:** {insight.get('description', 'N/A')}")
+                        st.write(f"**💡 Suggestion:** {insight.get('suggestion', 'N/A')}")
+
+            if low_priority:
+                st.write("🟢 **Low Priority:**")
+                for insight in low_priority[:2]:  # Show top 2
+                    with st.expander(f"{insight.get('title', 'Insight')}"):
+                        st.write(f"**Description:** {insight.get('description', 'N/A')}")
+                        st.write(f"**💡 Suggestion:** {insight.get('suggestion', 'N/A')}")
+    else:
+        st.info("No insights available.")
+
+    st.divider()
+
+    # Executive Summary
+    st.subheader("📝 Executive Summary")
+    summary = data.get("summary", "No summary available.")
+    st.markdown(f"_{summary}_")
 
 
 def main():

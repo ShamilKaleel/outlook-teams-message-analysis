@@ -119,86 +119,156 @@ class OutlookEmailsResponse(BaseModel):
     emails: list[OutlookEmail] = Field(..., description="List of all emails")
 
 
-class OutlookReplyProductivity(BaseModel):
+class OutlookVolumeMetrics(BaseModel):
     """
-    Reply productivity metrics for Outlook email conversations.
+    Volume metrics for Outlook email analysis.
 
-    Tracks conversation-level reply rates and engagement.
+    Tracks email counts across different categories for comprehensive volume analysis.
 
     Attributes:
-        conversations_received: Total number of unique conversations received
+        emails_received: Total number of emails received
+        emails_sent: Total number of emails sent (from sent items)
+        emails_replied: Total number of emails that were replied to
+        inbox_count: Current count of emails in inbox folder
+        spam_count: Number of spam/junk emails identified
+        urgent_count: Number of urgent emails requiring RSVP or immediate action
+        unread_count: Number of unread emails (backlog tracking)
+    """
+    emails_received: int = Field(..., description="Total number of emails received")
+    emails_sent: int = Field(..., description="Total number of emails sent")
+    emails_replied: int = Field(..., description="Total number of emails replied to")
+    inbox_count: int = Field(..., description="Current inbox email count")
+    spam_count: int = Field(..., description="Number of spam/junk emails")
+    urgent_count: int = Field(..., description="Number of urgent emails requiring action")
+    unread_count: int = Field(..., description="Number of unread emails (backlog)")
+
+
+class OutlookResponseMetrics(BaseModel):
+    """
+    Response performance metrics for Outlook email analysis.
+
+    Measures how quickly and consistently emails are responded to.
+
+    Attributes:
+        average_response_time_hours: Average time to respond in hours
+        median_response_time_hours: Median response time in hours
+        reply_rate_percentage: Percentage of received emails that were replied to
+        conversations_received: Total number of unique conversation threads received
         conversations_replied: Number of conversations that received at least one reply
-        reply_rate_conversation_level: Percentage of conversations that were replied to
     """
-    conversations_received: int = Field(
-        ..., description="Total number of unique conversations received"
-    )
-    conversations_replied: int = Field(
-        ..., description="Number of conversations that received at least one reply"
-    )
-    reply_rate_conversation_level: float = Field(
-        ...,
-        description="Percentage of conversations that were replied to (conversations_replied / conversations_received * 100)",
-    )
+    average_response_time_hours: Optional[float] = Field(None, description="Average response time in hours")
+    median_response_time_hours: Optional[float] = Field(None, description="Median response time in hours")
+    reply_rate_percentage: float = Field(..., description="Percentage of emails replied to")
+    conversations_received: int = Field(..., description="Total unique conversations received")
+    conversations_replied: int = Field(..., description="Conversations with at least one reply")
 
 
-class OutlookConversationSuggestion(BaseModel):
+class OutlookEngagementMetrics(BaseModel):
     """
-    AI-generated suggestions for improving email management for a specific conversation.
+    Engagement metrics for Outlook email communication patterns.
 
-    Provides actionable recommendations for email handling and communication.
+    Analyzes proactive vs reactive behavior and activity timing patterns.
 
     Attributes:
-        conversationId: Unique identifier of the conversation thread
-        counterparty: Email address of the counterparty in this conversation
-        suggestions: List of actionable suggestions for this conversation
+        proactive_emails: Number of emails initiated (not replies)
+        reactive_emails: Number of emails that are replies
+        proactive_vs_reactive_ratio: Ratio of proactive to reactive emails
+        peak_activity_hours: Top 3 hours of email activity (0-23 hour format)
+        emails_by_time_of_day: Distribution of emails by time period
+        most_active_day_of_week: Most active day for email communication
     """
-    conversationId: str = Field(
-        ..., description="Unique identifier of the conversation thread"
-    )
-    counterparty: str = Field(
-        ..., description="Email address of the counterparty in this conversation"
-    )
-    suggestions: List[str] = Field(
-        ...,
-        description="List of actionable suggestions for improving email management and communication for this conversation",
-    )
+    proactive_emails: int = Field(..., description="Emails initiated (not replies)")
+    reactive_emails: int = Field(..., description="Reply emails")
+    proactive_vs_reactive_ratio: float = Field(..., description="Ratio of proactive to reactive")
+    peak_activity_hours: List[int] = Field(default_factory=list, description="Top 3 activity hours (0-23)")
+    emails_by_time_of_day: dict = Field(default_factory=dict, description="Email distribution by time period (morning/afternoon/evening/night)")
+    most_active_day_of_week: Optional[str] = Field(None, description="Most active day of the week")
+
+
+class OutlookQualityIndicators(BaseModel):
+    """
+    Quality assessment indicators for Outlook email communication.
+
+    Evaluates email quality based on length, tone, sentiment, and clarity.
+
+    Attributes:
+        average_email_length: Average character length of emails
+        median_email_length: Median character length of emails
+        clarity_score: Email clarity rating (0-100, higher is better)
+        tone_assessment: Overall tone classification (professional/casual/mixed)
+        sentiment_distribution: Distribution of sentiment (positive/neutral/negative counts)
+        conciseness_score: Conciseness rating (0-100, higher means more concise)
+    """
+    average_email_length: float = Field(..., description="Average email character length")
+    median_email_length: float = Field(..., description="Median email character length")
+    clarity_score: int = Field(..., ge=0, le=100, description="Clarity score (0-100)")
+    tone_assessment: str = Field(..., description="Tone classification: professional/casual/mixed")
+    sentiment_distribution: dict = Field(default_factory=dict, description="Sentiment counts (positive/neutral/negative)")
+    conciseness_score: int = Field(..., ge=0, le=100, description="Conciseness score (0-100)")
+
+
+class OutlookProductivityScore(BaseModel):
+    """
+    Productivity scoring system for Outlook email management.
+
+    Generates comprehensive scores reflecting responsiveness, engagement, and quality.
+
+    Attributes:
+        overall_score: Overall productivity score (0-100)
+        responsiveness_score: Response speed and reply rate score (0-100)
+        engagement_score: Communication engagement score (0-100)
+        quality_score: Email quality and clarity score (0-100)
+        trend: Performance trend indicator
+        benchmark_comparison: Comparison to personal benchmark
+    """
+    overall_score: int = Field(..., ge=0, le=100, description="Overall productivity score (0-100)")
+    responsiveness_score: int = Field(..., ge=0, le=100, description="Responsiveness score (0-100)")
+    engagement_score: int = Field(..., ge=0, le=100, description="Engagement score (0-100)")
+    quality_score: int = Field(..., ge=0, le=100, description="Quality score (0-100)")
+    trend: Optional[str] = Field(None, description="Trend: improving/stable/declining")
+    benchmark_comparison: Optional[str] = Field(None, description="Comparison: above/at/below benchmark")
+
+
+class OutlookInsight(BaseModel):
+    """
+    Structured insight or recommendation for Outlook email management.
+
+    Provides actionable recommendations with priority levels and categories.
+
+    Attributes:
+        title: Short insight title
+        description: Detailed explanation of the insight
+        suggestion: Actionable recommendation
+        priority: Priority level (high/medium/low)
+        category: Insight category (delay/bottleneck/optimal_timing/follow_up/style/workload)
+    """
+    title: str = Field(..., description="Insight title")
+    description: str = Field(..., description="Detailed description")
+    suggestion: str = Field(..., description="Actionable suggestion")
+    priority: str = Field(..., description="Priority level: high, medium, or low")
+    category: str = Field(..., description="Category: delay/bottleneck/optimal_timing/follow_up/style/workload")
 
 
 class OutlookAnalysisResult(BaseModel):
     """
     Comprehensive analytics result for Outlook email analysis.
 
-    Contains email statistics, productivity metrics, and AI-generated suggestions.
+    Organized structure containing volume metrics, response metrics, engagement patterns,
+    quality indicators, productivity scoring, insights, and executive summary.
 
     Attributes:
-        total_emails: Total number of emails analyzed
-        inbox: Number of emails in inbox folder
-        sent_items: Number of emails in sent items folder
-        spam_emails: Number of emails identified as spam or junk
-        urgent_emails_with_rsvp: Number of urgent emails requiring RSVP or immediate action
-        reply_productivity: Reply productivity metrics at conversation level
-        average_response_time: Average response time in hours for replied emails
-        suggestions_for_replied_email: List of suggestions for each replied conversation
+        volume_metrics: Email volume tracking across categories
+        response_metrics: Response performance and reply rates
+        engagement_metrics: Proactive vs reactive patterns and timing trends
+        quality_indicators: Email quality assessment (clarity, tone, sentiment)
+        productivity_score: Multi-dimensional productivity scores (0-100)
+        insights: Prioritized actionable recommendations
+        summary: AI-generated executive summary of email communication patterns
     """
-    total_emails: int = Field(..., description="Total number of emails analyzed")
-    inbox: int = Field(..., description="Number of emails in inbox folder")
-    sent_items: int = Field(..., description="Number of emails in sent items folder")
-    spam_emails: int = Field(
-        ..., description="Number of emails identified as spam or junk"
-    )
-    urgent_emails_with_rsvp: int = Field(
-        ...,
-        description="Number of urgent emails that require RSVP or immediate action",
-    )
-    reply_productivity: OutlookReplyProductivity = Field(
-        ..., description="Reply productivity metrics at conversation level"
-    )
-    average_response_time: Optional[float] = Field(
-        None,
-        description="Average response time in hours calculated from receivedDateTime to sentDateTime for replied emails",
-    )
-    suggestions_for_replied_email: List[OutlookConversationSuggestion] = Field(
-        ...,
-        description="List of actionable suggestions for each conversation that has been replied to",
-    )
+    volume_metrics: OutlookVolumeMetrics = Field(..., description="Email volume metrics")
+    response_metrics: OutlookResponseMetrics = Field(..., description="Response performance metrics")
+    engagement_metrics: OutlookEngagementMetrics = Field(..., description="Engagement patterns and timing")
+    quality_indicators: OutlookQualityIndicators = Field(..., description="Email quality assessment")
+    productivity_score: OutlookProductivityScore = Field(..., description="Productivity scores (0-100)")
+    insights: List[OutlookInsight] = Field(..., description="Prioritized insights and recommendations")
+    summary: str = Field(..., description="AI-generated executive summary")

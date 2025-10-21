@@ -1,15 +1,16 @@
 # Analytics Dashboard
 
-Streamlit-based dashboard for viewing Outlook and Teams productivity analytics with AI-powered insights.
+Professional Streamlit dashboard with 10 interactive Plotly visualizations for Outlook and Teams productivity analytics powered by AI insights.
 
 ## Features
 
-- 📧 **Outlook Analytics**: Email statistics, reply productivity, response times, and AI suggestions
-- 💬 **Teams Analytics**: Message metrics, engagement scores, productivity scoring, and recommendations
+- 📊 **10 Interactive Plotly Charts**: Donut charts, funnel charts, gauges, bar charts, radar charts, and pie charts
+- 📧 **Outlook Analytics**: Email distribution donut, reply productivity funnel, response time gauges, and conversation bar chart
+- 💬 **Teams Analytics**: Message volume bars, communication style donut, productivity radar, response gauges, peak activity bars, and priority pie chart
 - 💾 **Smart Caching**: Results are cached locally to avoid unnecessary API calls
 - 🔄 **Manual Refresh**: Fetch recent analytics on-demand with a button click
 - 🎯 **Auto-fetch**: Automatically fetches analytics on first visit if no cache exists
-- 🎨 **Beautiful UI**: Clean, intuitive interface with tabs and visual components
+- 🎨 **Beautiful UI**: Professional interface with custom CSS styling, color-coded metrics, and responsive grid layouts
 
 ## Setup
 
@@ -26,7 +27,7 @@ The dashboard connects to the FastAPI backend. Make sure the server is running:
 
 ```bash
 # From the project root
-uv run python main.py
+uv run uvicorn main:app --host 0.0.0.0 --port 8000
 ```
 
 The server should be running at `http://localhost:8000`
@@ -63,20 +64,37 @@ The dashboard will open in your browser at `http://localhost:8501`
 
 ## Dashboard Sections
 
-### Outlook Analytics
+### Outlook Analytics Tab
 
-- **Email Statistics**: Total emails, inbox, sent, spam, urgent counts
-- **Reply Productivity**: Conversation metrics and reply rates
-- **Response Time**: Average time to respond to emails
-- **AI Suggestions**: Personalized recommendations for each conversation
+**Visualizations:**
+1. **Email Distribution Donut Chart**: Visual breakdown of emails by folder (Inbox, Sent, Spam, Urgent)
+2. **Reply Productivity Funnel**: Conversion flow from conversations received to replied
+3. **Reply Rate Gauge**: Performance indicator with color-coded zones (0-100%)
+4. **Top Conversations Bar Chart**: Shows conversations needing most attention
 
-### Teams Analytics
+**Sections:**
+- **Key Metrics Overview**: KPI cards for total emails, inbox, sent items, urgent
+- **Email Distribution & Reply Productivity**: Side-by-side donut and funnel charts
+- **Response Performance**: Gauge chart + response time metric with status indicators
+- **Conversations Needing Attention**: Bar chart + detailed AI suggestions
 
-- **Communication Metrics**: Messages received, sent, replied, proactive vs reactive
-- **Response Metrics**: Average response time and reply rate
-- **Engagement Metrics**: Peak activity hours, message length patterns
-- **Productivity Scores**: Overall, responsiveness, engagement, and quality scores (0-100)
-- **Insights**: AI-generated recommendations with priority levels
+### Teams Analytics Tab
+
+**Visualizations:**
+1. **Message Volume Bar Chart**: Grouped bars for received, sent, replied
+2. **Communication Style Donut Chart**: Proactive vs reactive message breakdown
+3. **Productivity Radar Chart**: 4-dimension spider chart (Overall, Responsiveness, Engagement, Quality)
+4. **Response Time Gauge**: Performance indicator for avg response time (0-48 hours)
+5. **Reply Rate Gauge**: Performance indicator for reply percentage (0-100%)
+6. **Peak Activity Hours Bar Chart**: Shows top 3 activity hours
+7. **Insights Priority Pie Chart**: Distribution of high/medium/low priority insights
+
+**Sections:**
+- **Key Communication Metrics**: KPI cards for messages and avg message length
+- **Message Volume & Communication Style**: Side-by-side bar and donut charts
+- **Productivity Scores & Response Metrics**: Radar chart + dual gauges
+- **Peak Activity Hours**: Bar chart showing optimal communication times
+- **Insights & Recommendations**: Priority pie chart + grouped detailed insights by priority level
 - **Executive Summary**: AI-generated summary of communication patterns
 
 ## Cache Management
@@ -140,7 +158,8 @@ If you encounter stale or corrupted cache:
 
 ```
 dashboard/
-├── streamlit_app.py      # Main Streamlit application
+├── streamlit_app.py      # Main Streamlit application with enhanced UI
+├── visualizations.py     # Plotly chart creation functions (10 chart types)
 ├── api_client.py         # FastAPI client for fetching analytics
 ├── cache_manager.py      # JSON-based cache management
 ├── cache/                # Cache storage (auto-created)
@@ -162,6 +181,7 @@ dashboard/
 
 - `streamlit>=1.31.0`: Dashboard framework
 - `requests>=2.31.0`: HTTP client for API calls
+- `plotly>=5.18.0`: Interactive visualization library for professional charts
 
 ## Tips
 
@@ -169,3 +189,6 @@ dashboard/
 - 🔄 Use "Fetch Recent Analytics" sparingly to avoid rate limits
 - 📊 Compare metrics over time by noting the timestamp on each fetch
 - 🎯 Focus on high-priority insights for maximum impact
+- 🖱️ Hover over charts for detailed tooltips with exact values
+- 📈 Use radar chart to quickly identify productivity gaps across dimensions
+- 🎨 Color-coded gauges show performance zones (green=good, yellow=moderate, red=needs attention)
