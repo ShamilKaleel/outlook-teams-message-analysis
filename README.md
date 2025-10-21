@@ -34,7 +34,6 @@ Refer to the official installation guide: [uv Installation](https://docs.astral.
 ### 2. Sync the Project with `uv`
 
 ```bash
-cd dashboard
 uv sync
 ```
 
