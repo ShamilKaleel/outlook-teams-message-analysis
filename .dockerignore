@@ -1,0 +1,75 @@
+# Environment and secrets - NEVER copy into Docker image
+.env
+.env.*
+*.env
+
+# Python virtual environment
+.venv/
+venv/
+env/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Docker files (not needed inside container)
+Dockerfile
+docker-compose*.yml
+.dockerignore
+
+# Documentation
+*.md
+CLAUDE.md
+README.md
+
+# Dashboard (Streamlit app - not needed in FastAPI container)
+dashboard/
+
+# Tests (optional - uncomment if you don't need tests in production image)
+tests/
+
+# Logs and temporary files
+*.log
+*.tmp
+*.temp
+.cache/
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+
+# Data files (if any)
+*.json
+*.csv
+*.xlsx
+
+# Windows specific
+Thumbs.db
+desktop.ini
+
+# macOS specific
+.DS_Store
+.AppleDouble
+.LSOverride
