@@ -251,7 +251,10 @@ async def fetch_chat_messages_raw(client, chat_id, chat_type, all_messages):
                 break
 
     except Exception as e:
-        # Log error but don't stop fetching other chats
-        print(
-            f"Error fetching messages from chat {chat_id}: {type(e).__name__} - {str(e)}"
-        )
+        # Silently skip chats that cannot be accessed (e.g., external/federated chats)
+        if "Forbidden" in str(e) or "Tenant Id mismatch" in str(e):
+            pass  # Expected for external chats with app permissions
+        else:
+            print(
+                f"Unexpected error fetching messages from chat {chat_id}: {type(e).__name__} - {str(e)}"
+            )
